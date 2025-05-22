@@ -1,9 +1,7 @@
 import torch.cuda
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# from greedy_decoding import greedy_decode
-# from sampling import sampling_decode
-from sampling_temperature import sampling_decode
+from beam_search import beam_search_decode
 
 
 if __name__ == "__main__":
@@ -25,21 +23,25 @@ if __name__ == "__main__":
                        'message.<|im_end|>\n<|im_start|>user\nTransfer 100 rubles and '
                        '50 kopeck to Mike<|im_end|>\n<|im_start|>assistant\n')
 
-    # output_text = greedy_decode(model, tokenizer, input_text_hedgehog, device)
-    # output_json = greedy_decode(model, tokenizer, input_text_json, device)
-    # print(output_text)
-    # print(output_json)
-    
+    # beam search experiments
+    settings = [
+        (1, 1.0),
+        (4, 1.0),
+        (4, 0.5),
+        (4, 2.0),
+        (8, 1.0),
+    ]
+    for num_beams, lp in settings:
+        out_text = beam_search_decode(model, tokenizer,
+                                      input_text_hedgehog, device,
+                                      num_beams=num_beams,
+                                      length_penalty=lp)
+        print(f"--- hedgehog (beams={num_beams}, lp={lp}) ---\n{out_text}\n")
 
-    # output_text = sampling_decode(model, tokenizer, input_text_hedgehog, device)
-    # print(output_text)
-    # output_json = sampling_decode(model, tokenizer, input_text_json, device)
-    # print(output_json)
+        out_json = beam_search_decode(model, tokenizer,
+                                      input_text_json, device,
+                                      num_beams=num_beams,
+                                      length_penalty=lp)
+        print(f"--- json (beams={num_beams}, lp={lp}) ---\n{out_json}\n")
 
 
-    # output_text = sampling_decode(model, tokenizer, input_text_hedgehog, device, temperature=10.0)
-    # print(output_text)
-    # output_json = sampling_decode(model, tokenizer, input_text_json, device, temperature=10.0)
-    # print(output_json)
-
-    
